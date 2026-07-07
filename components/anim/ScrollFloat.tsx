@@ -77,6 +77,25 @@ export default function ScrollFloat({
 
   const chars = useMemo(() => Array.from(children), [children]);
 
+  // Every letter is its own inline-block span so it can float independently,
+  // but that also lets the browser wrap a line between ANY two letters, not
+  // just at spaces (e.g. "workfl / ow"). Grouping letters into per-word,
+  // non-wrapping units keeps line breaks at real word boundaries, same fix
+  // as VariableProximity. Each group tracks its starting index into `chars`
+  // so animated spans still key off the original flat character offsets.
+  const groups = useMemo(() => {
+    const parts = children.split(/(\s+)/);
+    let cursor = 0;
+    return parts
+      .filter((p) => p.length > 0)
+      .map((text, gi) => {
+        const isSpace = /^\s+$/.test(text);
+        const start = cursor;
+        cursor += Array.from(text).length;
+        return { key: `g-${gi}`, text, isSpace, start };
+      });
+  }, [children]);
+
   const { scrollYProgress } = useScroll({
     target: wrapperRef,
     container: scrollContainerRef,
@@ -108,16 +127,33 @@ export default function ScrollFloat({
   return (
     <h2 ref={wrapperRef} className={containerClassName}>
       <span className={className} style={{ display: "inline-block" }}>
-        {chars.map((ch, i) => (
-          <Char
-            key={`${ch}-${i}`}
-            char={ch}
-            start={windows[i].start}
-            end={windows[i].end}
-            progress={scrollYProgress}
-            y={y}
-          />
-        ))}
+        {groups.map((g) =>
+          g.isSpace ? (
+            // Plain whitespace, a normal, breakable text node. Its own
+            // opacity/position never mattered visually, so no need to
+            // animate it individually.
+            <span key={g.key} style={{ whiteSpace: "pre" }}>
+              {g.text}
+            </span>
+          ) : (
+            // One word = one atomic, non-wrapping unit of per-character spans.
+            <span key={g.key} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+              {Array.from(g.text).map((ch, ci) => {
+                const i = g.start + ci;
+                return (
+                  <Char
+                    key={`${g.key}-${ci}`}
+                    char={ch}
+                    start={windows[i].start}
+                    end={windows[i].end}
+                    progress={scrollYProgress}
+                    y={y}
+                  />
+                );
+              })}
+            </span>
+          ),
+        )}
       </span>
     </h2>
   );

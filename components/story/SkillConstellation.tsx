@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { DiagramShell, DIAGRAM_THEME } from "@/components/diagram/DiagramShell";
 import { skillClusters, projects } from "@/content/content";
 
@@ -121,6 +121,9 @@ export function SkillConstellation({ onClose }: { onClose: () => void }) {
   const [focusCluster, setFocusCluster] = useState<string | null>(null);
   const [focusProject, setFocusProject] = useState<string | null>(null);
   const [hoverStar, setHoverStar] = useState<string | null>(null);
+  // The project chips are the whole point of this view, but easy to miss
+  // among the stars. A hint invites the first click, then gets out of the way.
+  const [triedProject, setTriedProject] = useState(false);
 
   const activeProject = projConstellations.find((p) => p.id === focusProject) ?? null;
   const litIds: Set<string> | null = activeProject
@@ -157,33 +160,52 @@ export function SkillConstellation({ onClose }: { onClose: () => void }) {
       subtitle="Every tool is a star; every cluster, a constellation. Hover a star to see what it's part of, or trace a project to watch its constellation light up."
       footer={
         <>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={clearFocus}
-              className="tk-chip"
-              data-active={!focusCluster && !focusProject ? "" : undefined}
-            >
-              <span className="tk-fill" aria-hidden />
-              <span className="tk-label">whole sky</span>
-            </button>
-            {projConstellations.map((p) => (
+          <div className="flex min-w-0 flex-col gap-1.5">
+            {/* impossible-to-miss invite, since the small subtitle text alone
+                was easy to skim past. Fades for good on the first real click. */}
+            <AnimatePresence>
+              {!triedProject && (
+                <motion.span
+                  className="wb-hover-hint inline-flex w-fit items-center gap-1.5 text-[11px] font-medium"
+                  style={{ color: t.accent }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.4 } }}
+                  transition={{ delay: 0.6, duration: 0.4 }}
+                >
+                  ✦ try clicking a project below, watch its stars light up
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <div className="flex flex-wrap items-center gap-2">
               <button
-                key={p.id}
                 type="button"
-                onClick={() => {
-                  setFocusCluster(null);
-                  setFocusProject((cur) => (cur === p.id ? null : p.id));
-                }}
+                onClick={clearFocus}
                 className="tk-chip"
-                data-active={focusProject === p.id ? "" : undefined}
+                data-active={!focusCluster && !focusProject ? "" : undefined}
               >
                 <span className="tk-fill" aria-hidden />
-                <span className="tk-label">
-                  {p.name.replace(/ System| & Analysis| Settlement System/i, "")}
-                </span>
+                <span className="tk-label">whole sky</span>
               </button>
-            ))}
+              {projConstellations.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    setFocusCluster(null);
+                    setTriedProject(true);
+                    setFocusProject((cur) => (cur === p.id ? null : p.id));
+                  }}
+                  className="tk-chip"
+                  data-active={focusProject === p.id ? "" : undefined}
+                >
+                  <span className="tk-fill" aria-hidden />
+                  <span className="tk-label">
+                    {p.name.replace(/ System| & Analysis| Settlement System/i, "")}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
           <div className="mt-1 flex shrink-0 items-center gap-4 text-[12px] sm:mt-0" style={{ color: t.dim }}>
             <span className="inline-flex items-center gap-1.5">
