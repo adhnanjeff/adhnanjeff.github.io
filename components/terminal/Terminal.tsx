@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useMode } from "@/components/entry/ModeProvider";
 import { BootSequence } from "./BootSequence";
 import { MissionComplete } from "./MissionComplete";
@@ -43,11 +43,22 @@ const toneColor: Record<Tone, string> = {
 let uid = 0;
 const nextId = () => ++uid;
 
+// Cycled in the empty prompt as a ghost hint, right where visitors are
+// already looking, so the "what do I even type" moment resolves itself.
+const PROMPT_HINTS = [
+  "try 'help'",
+  "try 'graph', it's draggable",
+  "hover the panel → it reacts",
+  "type anything, go on",
+  "try 'coffee'",
+];
+
 export default function Terminal() {
   const { setMode } = useMode();
   const [booted, setBooted] = useState(false);
   const [history, setHistory] = useState<Item[]>([]);
   const [input, setInput] = useState("");
+  const [hintIndex, setHintIndex] = useState(0);
   const [lastListing, setLastListing] = useState<"builds" | "help" | null>(null);
   const [activeSystem, setActiveSystem] = useState<SystemGraph | null>(null);
   const [showKnowledge, setShowKnowledge] = useState(false);
@@ -73,6 +84,16 @@ export default function Terminal() {
     const t = window.setInterval(tick, 1000);
     return () => window.clearInterval(t);
   }, []);
+
+  // Cycle the ghost hint while the prompt sits empty.
+  useEffect(() => {
+    if (!booted) return;
+    const t = window.setInterval(
+      () => setHintIndex((i) => (i + 1) % PROMPT_HINTS.length),
+      3600,
+    );
+    return () => window.clearInterval(t);
+  }, [booted]);
 
   const pushOutput = useCallback((lines: OutLine[]) => {
     setHistory((h) => [...h, { id: nextId(), kind: "output", lines }]);
@@ -305,6 +326,21 @@ export default function Terminal() {
                     <span style={{ color: "var(--term-accent)" }}>›</span>
                     <span className="ml-2 whitespace-pre">{input}</span>
                     <span className="term-cursor ml-0.5" />
+                    <AnimatePresence mode="wait">
+                      {input === "" && (
+                        <motion.span
+                          key={hintIndex}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="ml-2 select-none whitespace-pre"
+                          style={{ color: "var(--term-dim)" }}
+                        >
+                          {PROMPT_HINTS[hintIndex]}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                     <input
                       ref={inputRef}
                       value={input}
@@ -334,35 +370,47 @@ export default function Terminal() {
         {/* command chips, numbered like Byte's menu */}
         {booted && (
           <div className="mt-4 flex shrink-0 flex-wrap gap-2">
-            {CHIP_META.map(({ cmd, badge }) => (
-              <button
-                key={cmd}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  runChip(cmd);
-                }}
-                className="term-chip inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
-                style={{
-                  color: "var(--term-dim)",
-                  border: "1px solid #2a2723",
-                  fontFamily: "var(--font-mono), monospace",
-                }}
-              >
-                {badge && (
-                  <span
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-sm text-[10px]"
-                    style={{
-                      background: "color-mix(in oklab, var(--term-accent) 18%, transparent)",
-                      color: "var(--term-accent)",
-                    }}
-                  >
-                    {badge}
-                  </span>
-                )}
-                {cmd}
-              </button>
-            ))}
+            {CHIP_META.map(({ cmd, badge }) => {
+              const isGraph = cmd === "graph";
+              return (
+                <button
+                  key={cmd}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    runChip(cmd);
+                  }}
+                  className="term-chip inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
+                  style={
+                    isGraph
+                      ? {
+                          color: "var(--term-accent)",
+                          border: "1px solid color-mix(in oklab, var(--term-accent) 50%, transparent)",
+                          background: "color-mix(in oklab, var(--term-accent) 10%, var(--term-surface))",
+                          fontFamily: "var(--font-mono), monospace",
+                        }
+                      : {
+                          color: "var(--term-dim)",
+                          border: "1px solid #2a2723",
+                          fontFamily: "var(--font-mono), monospace",
+                        }
+                  }
+                >
+                  {badge && (
+                    <span
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-sm text-[10px]"
+                      style={{
+                        background: "color-mix(in oklab, var(--term-accent) 18%, transparent)",
+                        color: "var(--term-accent)",
+                      }}
+                    >
+                      {badge}
+                    </span>
+                  )}
+                  {isGraph ? <ShinyText text={`◆ ${cmd}`} speed={4} /> : cmd}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

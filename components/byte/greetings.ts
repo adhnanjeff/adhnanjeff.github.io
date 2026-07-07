@@ -14,6 +14,7 @@ export function byteGreeting(mem: Memory): string[] {
       "Hello, stranger.",
       "I'm Byte, Adhnan built me.",
       "Need a tour? Type 'help', or tap a chip below.",
+      "Also: that panel → reacts to your cursor. And 'graph' is draggable. Go on, try stuff.",
     ];
   }
 

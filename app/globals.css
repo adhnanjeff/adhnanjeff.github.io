@@ -469,6 +469,21 @@ body {
   50% { opacity: 0.55; }
 }
 
+/* nudges the eye toward the ambient pixel field, small enough to not */
+/* feel jittery, persistent enough to actually get noticed.            */
+.wb-hover-hint {
+  animation: wb-hover-bob 1.8s ease-in-out infinite;
+}
+@keyframes wb-hover-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-hover-hint {
+    animation: none;
+  }
+}
+
 /* --- Story Mode: playable project story ------------------------------ */
 .ps-hook {
   font-family: var(--font-display), serif;

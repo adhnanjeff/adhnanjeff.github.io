@@ -235,6 +235,17 @@ const EGGS: Record<string, OutLine[]> = {
   date: [L(new Date().toString(), "dim")],
 };
 
+// Common greetings land here instead of "command not found", the whole
+// point people type them is expecting a reply, so give them one.
+const GREETINGS = new Set([
+  "hi", "hii", "hiii", "hello", "hey", "heya", "yo", "sup", "hola",
+  "howdy", "whatsup", "wassup", "gm", "morning",
+]);
+const GREETING_REPLY: OutLine[] = [
+  L("hey. I don't really do small talk, I'm built for exploring Adhnan's work.", "accent"),
+  L("try 'help' to see what I can actually show you.", "dim"),
+];
+
 export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
   const input = raw.trim();
   if (!input) return {};
@@ -249,6 +260,7 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
   }
 
   if (EGGS[lower]) return { lines: EGGS[lower] };
+  if (GREETINGS.has(lower.replace(/[!.?]+$/, ""))) return { lines: GREETING_REPLY };
 
   const [cmdRaw, ...args] = lower.split(/\s+/);
   const cmd = ALIASES[cmdRaw] ?? cmdRaw;
@@ -313,6 +325,11 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
     case "clear":
       return { clear: true };
     default:
-      return { lines: [L(`command not found: ${cmdRaw}, try 'help'`, "err")] };
+      return {
+        lines: [
+          L(`command not found: ${cmdRaw}`, "err"),
+          L("try 'help' → it's worth it.", "dim"),
+        ],
+      };
   }
 }

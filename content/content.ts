@@ -503,6 +503,7 @@ export const certifications: Cert[] = [
   { name: "Claude Code in Action", issuer: "Anthropic", group: "anthropic" },
   { name: "Introduction to Agent Skills", issuer: "Anthropic", group: "anthropic" },
   { name: "Introduction to Subagents", issuer: "Anthropic", group: "anthropic" },
+  { name: "Introduction to Model Context Protocol", issuer: "Anthropic", group: "anthropic" },
   {
     name: "AI Engineer Agentic Track: The Complete Agent & MCP Course",
     issuer: "Udemy · Ed Donner, Ligency",

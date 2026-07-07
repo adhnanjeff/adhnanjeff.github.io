@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { skillClusters, profile } from "@/content/content";
 import { DiagramShell, DIAGRAM_THEME, type DiagramVariant } from "./DiagramShell";
 
@@ -204,6 +204,7 @@ export function KnowledgeGraph({
   const [hover, setHover] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false); // drives the pop-in
+  const [interacted, setInteracted] = useState(false); // hides the "try me" hint for good
   const moved = useRef(false);
 
   // Single RAF controller, never spawns a second loop.
@@ -268,6 +269,7 @@ export function KnowledgeGraph({
     const n = byId.current.get(id)!;
     dragId.current = id;
     moved.current = false;
+    setInteracted(true);
     const p = toView(e.clientX, e.clientY);
     n.fx = p.x;
     n.fy = p.y;
@@ -332,6 +334,7 @@ export function KnowledgeGraph({
         </div>
       }
     >
+      <div className="relative h-full w-full">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
@@ -445,6 +448,33 @@ export function KnowledgeGraph({
           );
         })}
       </svg>
+
+      {/* mounts already interactive, so the first thing a visitor should
+          know is that it's interactive. Fades for good on first drag. */}
+      <AnimatePresence>
+        {!interacted && (
+          <motion.div
+            className="pointer-events-none absolute inset-x-0 top-3 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.4 } }}
+            transition={{ delay: 0.7, duration: 0.4 }}
+          >
+            <span
+              className="wb-hover-hint inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium"
+              style={{
+                color: t.accent,
+                border: `1px solid color-mix(in oklab, ${t.accent} 45%, transparent)`,
+                background: `color-mix(in oklab, ${t.panel} 88%, transparent)`,
+                fontFamily: t.font,
+              }}
+            >
+              ✦ try dragging a node, go on
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
     </DiagramShell>
   );
 }

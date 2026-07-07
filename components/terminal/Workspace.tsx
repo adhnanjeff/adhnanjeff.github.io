@@ -157,6 +157,9 @@ function Label({ children }: { children: React.ReactNode }) {
 function Dashboard({ byte, mem }: { byte: ByteState; mem: Memory }) {
   const battery = Math.max(35, 100 - new Date().getHours() * 2);
   const seen = CORE_SECTIONS.filter((s) => mem.sectionsViewed.includes(s));
+  // The ambient field is easy to miss entirely, so a big hint invites the
+  // hover once, then gets out of the way for good the moment it lands.
+  const [fieldHovered, setFieldHovered] = useState(false);
   return (
     <div className="flex h-full min-h-0 flex-col gap-2.5 text-sm">
       <div className="flex items-center gap-3">
@@ -251,6 +254,7 @@ function Dashboard({ byte, mem }: { byte: ByteState; mem: Memory }) {
           background:
             "radial-gradient(120% 120% at 50% 0%, color-mix(in oklab, var(--term-accent) 6%, transparent), transparent 60%)",
         }}
+        onPointerEnter={() => setFieldHovered(true)}
       >
         <PixelField
           cell={16}
@@ -276,6 +280,31 @@ function Dashboard({ byte, mem }: { byte: ByteState; mem: Memory }) {
           />
           cursor-reactive
         </div>
+        {/* impossible-to-miss invite, since the corner label alone was easy
+            to skip. Fades for good the moment someone actually hovers. */}
+        <AnimatePresence>
+          {!fieldHovered && (
+            <motion.div
+              className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <span
+                className="wb-hover-hint inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium"
+                style={{
+                  color: "var(--term-accent)",
+                  border: "1px solid color-mix(in oklab, var(--term-accent) 45%, transparent)",
+                  background: "color-mix(in oklab, var(--term-bg) 70%, transparent)",
+                  fontFamily: "var(--font-mono), monospace",
+                }}
+              >
+                ↖ move your cursor here, go on
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
