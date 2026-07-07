@@ -147,10 +147,14 @@ export default function StoryHome() {
             <button
               type="button"
               onClick={() => setShowConstellation(true)}
-              className="press mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium"
-              style={{ background: "var(--story-accent)", color: "#fff" }}
+              className="press mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold"
+              style={{
+                color: "var(--story-accent)",
+                border: "1px solid color-mix(in oklab, var(--story-accent) 45%, transparent)",
+                background: "color-mix(in oklab, var(--story-accent) 8%, #fff)",
+              }}
             >
-              ✦ See it as a constellation
+              <ShinyText text="✦ See it as a constellation" speed={4} />
             </button>
           </Reveal>
         </section>

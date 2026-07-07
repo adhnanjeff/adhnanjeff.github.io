@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ByteFaceIcon } from "@/components/byte/ByteFaceIcon";
 import PixelField from "@/components/anim/PixelField";
+import ShinyText from "@/components/anim/ShinyText";
 import type { PanelSpec } from "./commands";
 import type { Memory } from "@/lib/memory";
 import { CORE_SECTIONS } from "@/lib/memory";
@@ -402,9 +403,14 @@ function Skills({ onRun }: { onRun: (cmd: string) => void }) {
         type="button"
         onClick={() => onRun("graph")}
         className="press mt-1 rounded-md px-3 py-1.5 text-xs font-semibold"
-        style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}
+        style={{
+          color: "var(--term-accent)",
+          border: "1px solid color-mix(in oklab, var(--term-accent) 50%, transparent)",
+          background: "color-mix(in oklab, var(--term-accent) 10%, var(--term-surface))",
+          fontFamily: "var(--font-mono), monospace",
+        }}
       >
-        ◆ open the knowledge graph
+        <ShinyText text="◆ open the knowledge graph" speed={4} />
       </button>
     </div>
   );

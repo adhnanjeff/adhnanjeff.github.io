@@ -8,6 +8,7 @@ import { MissionComplete } from "./MissionComplete";
 import { Workspace, type ByteState } from "./Workspace";
 import { SystemDiagram } from "@/components/diagram/SystemDiagram";
 import { KnowledgeGraph } from "@/components/diagram/KnowledgeGraph";
+import ShinyText from "@/components/anim/ShinyText";
 import { systems, type SystemGraph } from "@/content/systems";
 import { profile } from "@/content/content";
 import {
@@ -268,7 +269,11 @@ export default function Terminal() {
                               className="block text-left underline-offset-2 hover:underline"
                               style={{ color: toneColor[line.tone ?? "accent"] }}
                             >
-                              {line.text}
+                              {line.action === "arsenal --graph" ? (
+                                <ShinyText text={line.text} speed={4} />
+                              ) : (
+                                line.text
+                              )}
                             </button>
                           ) : line.href ? (
                             <a
