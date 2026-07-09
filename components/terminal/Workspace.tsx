@@ -18,6 +18,8 @@ import {
   achievements,
   responsibilities,
 } from "@/content/content";
+import { changelogByDate } from "@/lib/changelog";
+import { fetchGithubPulse, type PulseLine } from "@/lib/githubPulse";
 
 export type ByteState = {
   coffee: number; // 0–100
@@ -72,6 +74,7 @@ export function Workspace({
             {panel.kind === "timeline" && <Timeline />}
             {panel.kind === "certs" && <Certs />}
             {panel.kind === "contact" && <Contact onRun={onRun} />}
+            {panel.kind === "changelog" && <Changelog />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -545,6 +548,82 @@ function Certs() {
             {c.detail ? ` (${c.detail})` : ""}, {c.issuer}
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function Changelog() {
+  const groups = changelogByDate();
+  const [pulse, setPulse] = useState<PulseLine[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchGithubPulse().then((lines) => {
+      if (alive) setPulse(lines);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return (
+    <div className="space-y-4 text-sm">
+      <p className="text-xs" style={{ color: "var(--term-dim)" }}>
+        generated from git history at build time. every push updates this.
+      </p>
+      <div className="relative pl-5">
+        <div
+          className="absolute bottom-1 left-[5px] top-1 w-px"
+          style={{ background: "#2a2723" }}
+        />
+        {groups.map((g) => (
+          <div key={g.date} className="relative pb-4">
+            <span
+              className="absolute -left-5 top-1 inline-block h-[11px] w-[11px] rounded-full"
+              style={{ background: "var(--term-accent)", border: "2px solid var(--term-bg)" }}
+            />
+            <div className="text-xs" style={{ color: "var(--term-accent)" }}>
+              {g.date}
+            </div>
+            <div className="mt-1 space-y-1">
+              {g.entries.map((e) => (
+                <div key={e.hash} className="flex items-baseline gap-2">
+                  <span className="shrink-0 text-[10px] tabular-nums" style={{ color: "var(--term-dim)" }}>
+                    {e.hash}
+                  </span>
+                  <span style={{ color: "var(--term-text)" }}>{e.subject}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div>
+        <Label>live from github</Label>
+        {pulse === null ? (
+          <div className="text-xs" style={{ color: "var(--term-dim)" }}>
+            fetching…
+          </div>
+        ) : (
+          <div className="space-y-1 text-xs">
+            {pulse.map((p) => (
+              <div
+                key={p.text}
+                style={{
+                  color:
+                    p.tone === "accent"
+                      ? "var(--term-accent)"
+                      : p.tone === "dim"
+                        ? "var(--term-dim)"
+                        : "var(--term-text)",
+                }}
+              >
+                {p.text.trim()}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

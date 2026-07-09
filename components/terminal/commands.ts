@@ -29,7 +29,8 @@ export type PanelSpec =
   | { kind: "skills" }
   | { kind: "timeline" }
   | { kind: "certs" }
-  | { kind: "contact" };
+  | { kind: "contact" }
+  | { kind: "changelog" };
 
 export type CommandResult = {
   lines?: OutLine[];
@@ -345,7 +346,7 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
       return { lines: [L(`opening ${sysId} diagram…`, "dim"), ...hint], openSystem: sysId };
     }
     case "log":
-      return { lines: changelog(), listing: null, livePulse: true };
+      return { lines: changelog(), listing: null, livePulse: true, panel: { kind: "changelog" } };
     case "story":
       return { lines: [L("switching to Story Mode…", "dim")], switchMode: "story" };
     case "byte":
