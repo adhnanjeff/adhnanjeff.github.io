@@ -20,8 +20,9 @@ type GhEvent = {
   type: string;
   repo?: { name: string };
   created_at: string;
+  // Note: this endpoint's PushEvent payload carries no commit count or
+  // commits array (verified against the live API), only refs/ids.
   payload?: {
-    commits?: unknown[];
     action?: string;
     ref_type?: string;
   };
@@ -46,9 +47,7 @@ function condense(events: GhEvent[]): PulseLine[] {
     if (ev.type === "PushEvent") {
       if (pushedRepos.has(repo)) continue;
       pushedRepos.add(repo);
-      const n = ev.payload?.commits?.length ?? 0;
-      const what = n === 1 ? "1 commit" : `${n} commits`;
-      lines.push({ text: `  ⟳ pushed ${what} to ${repo} · ${when}`, tone: "default" });
+      lines.push({ text: `  ⟳ pushed to ${repo} · ${when}`, tone: "default" });
     } else if (ev.type === "PullRequestEvent" && ev.payload?.action === "opened") {
       lines.push({ text: `  ⟳ opened a pull request in ${repo} · ${when}`, tone: "default" });
     } else if (ev.type === "CreateEvent" && ev.payload?.ref_type === "repository") {
