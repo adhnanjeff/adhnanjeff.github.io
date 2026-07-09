@@ -11,6 +11,7 @@ import {
   responsibilities,
 } from "@/content/content";
 import { resolveSystemId, systems } from "@/content/systems";
+import { changelogByDate } from "@/lib/changelog";
 
 export type Tone = "default" | "dim" | "accent" | "ok" | "err";
 export type OutLine = {
@@ -39,6 +40,7 @@ export type CommandResult = {
   markSection?: string;
   markProject?: string;
   listing?: "builds" | "help" | null;
+  livePulse?: boolean; // Terminal fetches GitHub activity and appends it
   panel?: PanelSpec;
 };
 
@@ -58,6 +60,7 @@ export const COMMAND_META: { name: string; alias?: string; desc: string }[] = [
   { name: "arsenal", alias: "skills", desc: "the tools" },
   { name: "timeline", alias: "experience", desc: "where he's been" },
   { name: "certs", desc: "Claude Code & more" },
+  { name: "log", alias: "changelog", desc: "what shipped, from git" },
   { name: "ping", alias: "contact", desc: "how to reach him" },
 ];
 
@@ -71,6 +74,7 @@ export const CHIP_META: { cmd: string; badge?: string }[] = [
   { cmd: "graph" },
   { cmd: "architecture" },
   { cmd: "certs" },
+  { cmd: "log" },
 ];
 
 const ALIASES: Record<string, string> = {
@@ -84,6 +88,8 @@ const ALIASES: Record<string, string> = {
   contact: "ping",
   theme: "story",
   arch: "architecture",
+  changelog: "log",
+  updates: "log",
 };
 
 function helpMenu(): OutLine[] {
@@ -97,7 +103,8 @@ function helpMenu(): OutLine[] {
     L("  4  ping       how to reach him"),
     BLANK,
     L("Also: 'certs', 'graph' (his stack as a knowledge graph),", "dim"),
-    L("and 'architecture' to explore a system he designed.", "dim"),
+    L("'architecture' to explore a system he designed,", "dim"),
+    L("and 'log', what's shipped lately, straight from git.", "dim"),
     BLANK,
     L("Type a number, a command, or tap a chip below.", "dim"),
   ];
@@ -199,6 +206,26 @@ function certs(): OutLine[] {
   other.forEach((c) =>
     out.push(L(`  · ${c.name}${c.detail ? "  (" + c.detail + ")" : ""}, ${c.issuer}`, "dim")),
   );
+  return out;
+}
+
+function changelog(): OutLine[] {
+  const out: OutLine[] = [
+    L("what's shipped, straight from git. this updates itself on every push.", "accent"),
+    BLANK,
+  ];
+  let shown = 0;
+  for (const g of changelogByDate()) {
+    if (shown >= 8) break;
+    out.push(L(`  ${g.date}`, "dim"));
+    for (const e of g.entries) {
+      if (shown >= 8) break;
+      out.push(L(`    ✦ ${e.subject}`));
+      shown++;
+    }
+  }
+  out.push(BLANK);
+  out.push(L("checking what he's shipping elsewhere…", "dim"));
   return out;
 }
 
@@ -317,6 +344,8 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
           : [];
       return { lines: [L(`opening ${sysId} diagram…`, "dim"), ...hint], openSystem: sysId };
     }
+    case "log":
+      return { lines: changelog(), listing: null, livePulse: true };
     case "story":
       return { lines: [L("switching to Story Mode…", "dim")], switchMode: "story" };
     case "byte":

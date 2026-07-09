@@ -26,6 +26,7 @@ import {
   type Memory,
 } from "@/lib/memory";
 import { byteGreeting } from "@/components/byte/greetings";
+import { fetchGithubPulse } from "@/lib/githubPulse";
 
 type Item =
   | { id: number; kind: "input"; text: string }
@@ -51,6 +52,7 @@ const PROMPT_HINTS = [
   "hover the panel → it reacts",
   "type anything, go on",
   "try 'coffee'",
+  "try 'log', this site updates itself",
 ];
 
 export default function Terminal() {
@@ -159,6 +161,13 @@ export default function Terminal() {
         return;
       }
       if (result.lines) pushOutput(result.lines);
+      // Live pulse resolves after the baked log has printed; pushOutput is a
+      // stable setState wrapper, so late resolution is safe.
+      if (result.livePulse) {
+        fetchGithubPulse().then((pulse) =>
+          pushOutput(pulse.map((p): OutLine => ({ text: p.text, tone: p.tone }))),
+        );
+      }
       if (result.listing !== undefined) setLastListing(result.listing);
       if (result.panel) setPanel(result.panel);
 
