@@ -1,6 +1,36 @@
 {
-  "generatedAt": "2026-07-09T14:21:23.571Z",
+  "generatedAt": "2026-07-09T14:35:46.523Z",
   "commits": [
+    {
+      "hash": "97eea8b",
+      "date": "2026-07-09",
+      "subject": "Add a 'still being written' section to Story Mode"
+    },
+    {
+      "hash": "fabc48f",
+      "date": "2026-07-09",
+      "subject": "Add a changelog workspace panel with the live GitHub pulse"
+    },
+    {
+      "hash": "178dbea",
+      "date": "2026-07-09",
+      "subject": "Add a 'log' command: baked git changelog plus live GitHub pulse"
+    },
+    {
+      "hash": "590588d",
+      "date": "2026-07-09",
+      "subject": "Add a live GitHub activity pulse fetcher"
+    },
+    {
+      "hash": "63d458a",
+      "date": "2026-07-09",
+      "subject": "Add typed accessor over the generated changelog"
+    },
+    {
+      "hash": "ecf5586",
+      "date": "2026-07-09",
+      "subject": "Generate a changelog from git history at every build"
+    },
     {
       "hash": "25943b1",
       "date": "2026-07-09",

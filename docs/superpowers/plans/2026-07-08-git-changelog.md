@@ -38,7 +38,7 @@
 **Interfaces:**
 - Produces: `content/changelog.generated.json` with shape `{ generatedAt: string, commits: { hash: string, date: string, subject: string }[] }`, commits newest first, dates `YYYY-MM-DD`. Task 2 imports this file.
 
-- [ ] **Step 1: Write the generator script**
+- [x] **Step 1: Write the generator script**
 
 Create `scripts/generate-changelog.mjs`:
 
@@ -89,7 +89,7 @@ writeFileSync(
 console.log(`[changelog] wrote ${commits.length} commits to content/changelog.generated.json`);
 ```
 
-- [ ] **Step 2: Run it and verify the output**
+- [x] **Step 2: Run it and verify the output**
 
 Run: `node scripts/generate-changelog.mjs`
 Expected: `[changelog] wrote N commits to content/changelog.generated.json` where N >= 6.
@@ -97,7 +97,7 @@ Expected: `[changelog] wrote N commits to content/changelog.generated.json` wher
 Run: `node -e "const d=require('./content/changelog.generated.json'); if(!d.commits.length) throw new Error('empty'); const c=d.commits[0]; if(!/^[0-9a-f]{7,}$/.test(c.hash)||!/^\d{4}-\d{2}-\d{2}$/.test(c.date)||!c.subject) throw new Error('bad shape: '+JSON.stringify(c)); console.log('shape ok, newest:', c.subject)"`
 Expected: `shape ok, newest: <most recent commit subject>`
 
-- [ ] **Step 3: Wire prebuild/predev**
+- [x] **Step 3: Wire prebuild/predev**
 
 In `package.json`, change the scripts block to:
 
@@ -112,7 +112,7 @@ In `package.json`, change the scripts block to:
   },
 ```
 
-- [ ] **Step 4: Un-shallow the CI checkout**
+- [x] **Step 4: Un-shallow the CI checkout**
 
 In `.github/workflows/deploy.yml`, change:
 
@@ -128,7 +128,7 @@ to:
           fetch-depth: 0 # full history, the changelog is generated from git log
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/generate-changelog.mjs content/changelog.generated.json package.json .github/workflows/deploy.yml
@@ -146,7 +146,7 @@ git commit -m "Generate a changelog from git history at every build"
 - Consumes: `content/changelog.generated.json` from Task 1.
 - Produces: `ChangelogEntry { hash: string; date: string; subject: string }`, `getChangelog(): ChangelogEntry[]`, `latestUpdate(): string | null`, `changelogByDate(): { date: string; entries: ChangelogEntry[] }[]`. Tasks 4, 5, 6 import these.
 
-- [ ] **Step 1: Write the accessor**
+- [x] **Step 1: Write the accessor**
 
 Create `lib/changelog.ts`:
 
@@ -188,12 +188,12 @@ export function changelogByDate(): { date: string; entries: ChangelogEntry[] }[]
 }
 ```
 
-- [ ] **Step 2: Verify it compiles**
+- [x] **Step 2: Verify it compiles**
 
 Run: `npx tsc --noEmit`
 Expected: exits 0, no output.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add lib/changelog.ts
@@ -211,7 +211,7 @@ git commit -m "Add typed accessor over the generated changelog"
 - Consumes: `profile.links.github` from `content/content.ts` (value: `"https://github.com/adhnanjeff"`).
 - Produces: `PulseLine { text: string; tone: "dim" | "default" | "accent" }`, `fetchGithubPulse(): Promise<PulseLine[]>`. Tasks 4 and 5 import these. Never rejects: all failures resolve to a single calm dim line.
 
-- [ ] **Step 1: Write the fetcher**
+- [x] **Step 1: Write the fetcher**
 
 Create `lib/githubPulse.ts`:
 
@@ -313,12 +313,12 @@ export async function fetchGithubPulse(): Promise<PulseLine[]> {
 }
 ```
 
-- [ ] **Step 2: Verify it compiles and lints**
+- [x] **Step 2: Verify it compiles and lints**
 
 Run: `npx tsc --noEmit && npm run lint`
 Expected: both exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add lib/githubPulse.ts
@@ -337,7 +337,7 @@ git commit -m "Add a live GitHub activity pulse fetcher"
 - Consumes: `changelogByDate()` (Task 2), `fetchGithubPulse()`/`PulseLine` (Task 3).
 - Produces: `CommandResult.livePulse?: boolean` (Task 5's panel does NOT use this; it fetches directly). `log` command with aliases `changelog`, `updates`. Task 5 adds `panel: { kind: "changelog" }` to this command's return, so keep its return object on one line for an easy later edit.
 
-- [ ] **Step 1: Add the changelog output function to commands.ts**
+- [x] **Step 1: Add the changelog output function to commands.ts**
 
 In `components/terminal/commands.ts`, add after the existing `certs()` function (line ~203):
 
@@ -369,7 +369,7 @@ And add the import at the top with the other `@/` imports:
 import { changelogByDate } from "@/lib/changelog";
 ```
 
-- [ ] **Step 2: Wire the command, flag, aliases, chip, menu**
+- [x] **Step 2: Wire the command, flag, aliases, chip, menu**
 
 Still in `commands.ts`:
 
@@ -420,7 +420,7 @@ f. Add the switch case before `case "story":`:
       return { lines: changelog(), listing: null, livePulse: true };
 ```
 
-- [ ] **Step 3: Wire the async pulse in Terminal.tsx**
+- [x] **Step 3: Wire the async pulse in Terminal.tsx**
 
 a. Add import after the `byteGreeting` import:
 
@@ -446,14 +446,14 @@ c. Add one entry to `PROMPT_HINTS` (after `"try 'coffee'"`):
   "try 'log', this site updates itself",
 ```
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `npx tsc --noEmit && npm run lint && npm run build`
 Expected: all exit 0; build prints the static export summary including `out/`.
 
 Manual check (orchestrator will re-verify): dev server → type `log` → baked entries grouped by date appear instantly, then within ~2s the pulse lines (or the calm failure line) append. `help` shows the new line; the `log` chip renders; the new hint cycles in the prompt.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add components/terminal/commands.ts components/terminal/Terminal.tsx
@@ -472,7 +472,7 @@ git commit -m "Add a 'log' command: baked git changelog plus live GitHub pulse"
 - Consumes: `changelogByDate()` (Task 2), `fetchGithubPulse()`/`PulseLine` (Task 3), existing `Label` helper and `BORDER` const in Workspace.tsx.
 - Produces: `PanelSpec` variant `{ kind: "changelog" }`; `log` command now also swaps the workspace panel.
 
-- [ ] **Step 1: Extend PanelSpec and the log case in commands.ts**
+- [x] **Step 1: Extend PanelSpec and the log case in commands.ts**
 
 a. In the `PanelSpec` union (line ~24), add:
 
@@ -487,7 +487,7 @@ b. Change the `log` case to:
       return { lines: changelog(), listing: null, livePulse: true, panel: { kind: "changelog" } };
 ```
 
-- [ ] **Step 2: Add the panel component to Workspace.tsx**
+- [x] **Step 2: Add the panel component to Workspace.tsx**
 
 a. Add imports (top of file, with the other `@/` imports):
 
@@ -582,14 +582,14 @@ function Changelog() {
 }
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `npx tsc --noEmit && npm run lint && npm run build`
 Expected: all exit 0.
 
 Manual check (orchestrator will re-verify): typing `log` swaps the right panel to the changelog view; header shows "changelog"; pulse section fills in after fetch.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add components/terminal/commands.ts components/terminal/Workspace.tsx
@@ -608,7 +608,7 @@ git commit -m "Add a changelog workspace panel with the live GitHub pulse"
 - Consumes: `changelogByDate()`, `latestUpdate()` (Task 2), `Reveal` from `components/story/Reveal.tsx`.
 - Produces: `<StillWriting />` section component. Baked data only, no API calls (Story Mode stays calm).
 
-- [ ] **Step 1: Create the component**
+- [x] **Step 1: Create the component**
 
 Create `components/story/StillWriting.tsx`:
 
@@ -672,7 +672,7 @@ export function StillWriting() {
 }
 ```
 
-- [ ] **Step 2: Mount it in StoryHome**
+- [x] **Step 2: Mount it in StoryHome**
 
 In `components/story/StoryHome.tsx`:
 
@@ -688,14 +688,14 @@ b. Between the certs section's closing `</section>` and the `{/* Contact + cross
         <StillWriting />
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `npx tsc --noEmit && npm run lint && npm run build`
 Expected: all exit 0.
 
 Manual check (orchestrator will re-verify): Story Mode shows the new section between certificates and "Let's talk.", with the latest 3 commit subjects and the last-updated date.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add components/story/StillWriting.tsx components/story/StoryHome.tsx
@@ -708,12 +708,12 @@ git commit -m "Add a 'still being written' section to Story Mode"
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Full build + lint from clean state**
+- [x] **Step 1: Full build + lint from clean state**
 
 Run: `npm run build && npm run lint`
 Expected: prebuild regenerates the JSON (log line appears), build emits `out/`, lint passes.
 
-- [ ] **Step 2: Preview checks (dev server)**
+- [x] **Step 2: Preview checks (dev server)**
 
 - `log` command: baked entries grouped by date, then pulse lines appended (or the calm failure line when offline).
 - Aliases `changelog` and `updates` behave identically.
