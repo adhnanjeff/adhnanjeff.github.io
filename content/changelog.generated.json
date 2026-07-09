@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-07-09T14:21:23.571Z",
+  "commits": [
+    {
+      "hash": "25943b1",
+      "date": "2026-07-09",
+      "subject": "Add implementation plan for the git-sourced changelog"
+    },
+    {
+      "hash": "1851448",
+      "date": "2026-07-09",
+      "subject": "Add design spec for the git-sourced changelog feature"
+    },
+    {
+      "hash": "c7bbd9d",
+      "date": "2026-07-07",
+      "subject": "Fix mid-word line breaks in ScrollFloat, add constellation click hint"
+    },
+    {
+      "hash": "84f77a0",
+      "date": "2026-07-07",
+      "subject": "Make Engineer Mode's hidden interactions discoverable, add MCP cert"
+    },
+    {
+      "hash": "85b5e8a",
+      "date": "2026-07-07",
+      "subject": "Replace the default favicon with Adhnan's avatar"
+    },
+    {
+      "hash": "cc85acf",
+      "date": "2026-07-07",
+      "subject": "Make the graph/constellation entry points shimmer so they read as clickable"
+    },
+    {
+      "hash": "15d64fb",
+      "date": "2026-07-07",
+      "subject": "Portfolio: dual-mode Engineer/Story site, static-export ready for GitHub Pages"
+    }
+  ]
+}
