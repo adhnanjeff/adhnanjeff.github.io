@@ -9,6 +9,7 @@ import { Reveal } from "./Reveal";
 import { StoryToolkit } from "./StoryToolkit";
 import { SkillConstellation } from "./SkillConstellation";
 import { StoryTimeline } from "./StoryTimeline";
+import { StillWriting } from "./StillWriting";
 import CountUp from "@/components/anim/CountUp";
 import ShinyText from "@/components/anim/ShinyText";
 import ScrollReveal from "@/components/anim/ScrollReveal";
@@ -280,6 +281,8 @@ export default function StoryHome() {
             </div>
           </Reveal>
         </section>
+
+        <StillWriting />
 
         {/* Contact + crossover close */}
         <section className="border-t py-20 text-center" style={{ borderColor: "var(--story-line)" }}>
